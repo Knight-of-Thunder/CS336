@@ -12,6 +12,7 @@ from torch import Tensor
 
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 from cs336_basics.Linear import Linear
+from cs336_basics.Embedding import Embedding
 from multiprocessing import Pool
 
 import regex as re
@@ -39,7 +40,6 @@ def run_linear(
     linear.load_state_dict({"weight": weights})
     return linear.forward(in_features)
 
-
 def run_embedding(
     vocab_size: int,
     d_model: int,
@@ -58,8 +58,9 @@ def run_embedding(
     Returns:
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
-
-    raise NotImplementedError
+    embedding = Embedding(vocab_size, d_model)
+    embedding.load_state_dict({"weight": weights})
+    return embedding.forward(token_ids)
 
 
 def run_swiglu(
