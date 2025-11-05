@@ -11,6 +11,7 @@ from jaxtyping import Bool, Float, Int
 from torch import Tensor
 
 from cs336_basics.pretokenization_example import find_chunk_boundaries
+from cs336_basics.Linear import Linear
 from multiprocessing import Pool
 
 import regex as re
@@ -34,8 +35,9 @@ def run_linear(
     Returns:
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
-
-    raise NotImplementedError
+    linear = Linear(d_in, d_out)
+    linear.load_state_dict({"weight": weights})
+    return linear.forward(in_features)
 
 
 def run_embedding(
