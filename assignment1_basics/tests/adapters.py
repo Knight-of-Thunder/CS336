@@ -10,9 +10,12 @@ import torch
 from jaxtyping import Bool, Float, Int
 from torch import Tensor
 
+
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 from cs336_basics.Linear import Linear
 from cs336_basics.Embedding import Embedding
+from cs336_basics.RMSNorm import RMSNorm
+from cs336_basics.SwiGLU import SwiGLU
 from multiprocessing import Pool
 
 import regex as re
@@ -89,10 +92,11 @@ def run_swiglu(
     # If your state dict keys match, you can use `load_state_dict()`
     # swiglu.load_state_dict(weights)
     # You can also manually assign the weights
-    # swiglu.w1.weight.data = w1_weight
-    # swiglu.w2.weight.data = w2_weight
-    # swiglu.w3.weight.data = w3_weight
-    raise NotImplementedError
+    swiglu = SwiGLU(d_model, d_ff)
+    swiglu.linear1.weight.data = w1_weight
+    swiglu.linear2.weight.data = w2_weight
+    swiglu.linear3.weight.data = w3_weight
+    return swiglu.forward(in_features)
 
 
 def run_scaled_dot_product_attention(
@@ -387,7 +391,10 @@ def run_rmsnorm(
         Float[Tensor,"... d_model"]: Tensor of with the same shape as `in_features` with the output of running
         RMSNorm of the `in_features`.
     """
-    raise NotImplementedError
+    rmsnorm = RMSNorm(d_model, eps)
+    rmsnorm.load_state_dict({"scale": weights})
+    return rmsnorm.forward(in_features)                                                                         
+
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
