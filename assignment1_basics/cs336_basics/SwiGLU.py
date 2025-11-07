@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor, sigmoid
 from .Linear import Linear
+from einops import einsum
 
 
 class SwiGLU(nn.Module):
