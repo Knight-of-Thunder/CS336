@@ -20,6 +20,7 @@ from cs336_basics.Embedding import Embedding
 from cs336_basics.RMSNorm import RMSNorm
 from cs336_basics.SwiGLU import SwiGLU
 from cs336_basics.Softmax import Softmax
+from cs336_basics.TransformerLM import TransformerLM
 from multiprocessing import Pool
 
 import regex as re
@@ -407,8 +408,27 @@ def run_transformer_lm(
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    raise NotImplementedError
+    transformer_lm = TransformerLM(vocab_size=vocab_size, context_length=context_length, d_model=d_model, num_layers=num_layers, num_heads=num_heads, d_ff=d_ff, rope_theta=rope_theta)
 
+    # transformer_lm.load_state_dict({
+    #     "token_embedding.weight": weights["token_embeddings.weight"],
+    #     "lm_head.weight": weights["lm_head.weight"],
+    #     "ln_final.scale": weights["ln_final.weight"],
+    # })
+    # for layer_idx in range(num_layers):
+    #     transformer_lm.blocks[layer_idx].load_state_dict({
+    #         "mhsa.W_Q.weight": weights[f"layers.{layer_idx}.attn.q_proj.weight"],
+    #         "mhsa.W_K.weight": weights[f"layers.{layer_idx}.attn.k_proj.weight"],
+    #         "mhsa.W_V.weight": weights[f"layers.{layer_idx}.attn.v_proj.weight"],
+    #         "mhsa.W_O.weight": weights[f"layers.{layer_idx}.attn.output_proj.weight"],
+    #         "norm1.scale": weights[f"layers.{layer_idx}.ln1.weight"],
+    #         "ffn.linear1.weight": weights[f"layers.{layer_idx}.ffn.w1.weight"],
+    #         "ffn.linear2.weight": weights[f"layers.{layer_idx}.ffn.w2.weight"],
+    #         "ffn.linear3.weight": weights[f"layers.{layer_idx}.ffn.w3.weight"],
+    #         "norm2.scale": weights[f"layers.{layer_idx}.ln2.weight"],
+    #     })
+    transformer_lm.load_state_dict(weights)
+    return transformer_lm.forward(in_indices)
 
 def run_rmsnorm(
     d_model: int,
