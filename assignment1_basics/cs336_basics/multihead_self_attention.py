@@ -32,10 +32,7 @@ class multihead_self_attention(nn.Module):
             assert max_seq_len is not None
             assert theta is not None
             self.rope = RoPE(theta=theta, d_k=self.d_k, max_seq_len=max_seq_len)
-            # self.token_positions = token_positions
         
-        
-
     def forward(
         self,
         x: torch.Tensor,

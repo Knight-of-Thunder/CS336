@@ -12,6 +12,7 @@ from torch import Tensor
 
 
 from cs336_basics.RoPE import RotaryPositionalEmbedding
+from cs336_basics.TransformerBlock import TransformerBlock
 from cs336_basics.multihead_self_attention import multihead_self_attention
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 from cs336_basics.Linear import Linear
@@ -307,7 +308,24 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
-    raise NotImplementedError
+    
+    model = TransformerBlock(d_model=d_model, num_heads=num_heads, d_ff=d_ff, rope=True, theta=theta, max_seq_len=max_seq_len)
+    model.load_state_dict(
+        {
+            "mhsa.W_Q.weight": weights["attn.q_proj.weight"],
+            "mhsa.W_K.weight": weights["attn.k_proj.weight"],
+            "mhsa.W_V.weight": weights["attn.v_proj.weight"],
+            "mhsa.W_O.weight": weights["attn.output_proj.weight"],
+            "norm1.scale": weights["ln1.weight"],
+            "ffn.linear1.weight": weights["ffn.w1.weight"],
+            "ffn.linear2.weight": weights["ffn.w2.weight"],
+            "ffn.linear3.weight": weights["ffn.w3.weight"],
+            "norm2.scale": weights["ln2.weight"],
+        }
+    )
+    B, S, _ = in_features.shape
+    positions = torch.arange(S,).expand(B, S)  # (B, S)
+    return model.forward(in_features, token_positions=positions)
 
 
 def run_transformer_lm(
