@@ -13,7 +13,7 @@ class multihead_self_attention(nn.Module):
         rope: bool = False,
         theta: float | None = None,
         max_seq_len: int | None = None,
-        token_positions: Int[torch.Tensor, " ... sequence_length"] | None = None,
+
     ) -> None:
         super().__init__()
         if d_model % num_heads != 0:
@@ -32,13 +32,14 @@ class multihead_self_attention(nn.Module):
             assert max_seq_len is not None
             assert theta is not None
             self.rope = RoPE(theta=theta, d_k=self.d_k, max_seq_len=max_seq_len)
-            self.token_positions = token_positions
+            # self.token_positions = token_positions
         
         
 
     def forward(
         self,
         x: torch.Tensor,
+        token_positions: Int[torch.Tensor, " ... sequence_length"] | None = None,
     ):
         seq_len = x.shape[-2]
         mask = torch.tril(torch.ones(seq_len, seq_len), diagonal=0).bool()
@@ -51,8 +52,8 @@ class multihead_self_attention(nn.Module):
         V = rearrange(V, "... s (h d) -> ... h s d", h=self.num_heads)
 
         if hasattr(self, 'rope'):
-            assert self.token_positions is not None
-            Q, K = self.rope.forward(Q, self.token_positions), self.rope.forward(K, self.token_positions)
+            assert token_positions is not None
+            Q, K = self.rope.forward(Q, token_positions), self.rope.forward(K, token_positions)
         attn_output = scaled_dot_product_attention(Q, K, V, mask)
         attn_output = rearrange(attn_output, "b h s d -> b s (h d)")
         output = self.W_O(attn_output)
