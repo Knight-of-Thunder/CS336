@@ -11,22 +11,22 @@ from jaxtyping import Bool, Float, Int
 from torch import Tensor
 
 
-from cs336_basics.RoPE import RotaryPositionalEmbedding
-from cs336_basics.TransformerBlock import TransformerBlock
-from cs336_basics.multihead_self_attention import multihead_self_attention
+from cs336_basics.Model.RoPE import RotaryPositionalEmbedding
+from cs336_basics.Model.TransformerBlock import TransformerBlock
+from cs336_basics.Model.multihead_self_attention import multihead_self_attention
 from cs336_basics.pretokenization_example import find_chunk_boundaries
-from cs336_basics.Linear import Linear
-from cs336_basics.Embedding import Embedding
-from cs336_basics.RMSNorm import RMSNorm
-from cs336_basics.SwiGLU import SwiGLU
-from cs336_basics.Softmax import Softmax
-from cs336_basics.TransformerLM import TransformerLM
+from cs336_basics.Model.Linear import Linear
+from cs336_basics.Model.Embedding import Embedding
+from cs336_basics.Model.RMSNorm import RMSNorm
+from cs336_basics.Model.SwiGLU import SwiGLU
+from cs336_basics.Model.Softmax import Softmax
+from cs336_basics.Model.TransformerLM import TransformerLM
 from multiprocessing import Pool
 
 import regex as re
 from collections import Counter
 
-from cs336_basics.scaled_dot_product_attention import scaled_dot_product_attention
+from cs336_basics.Model.scaled_dot_product_attention import scaled_dot_product_attention
 
 
 
