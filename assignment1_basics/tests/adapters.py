@@ -14,6 +14,7 @@ from torch import Tensor
 from cs336_basics.Model.RoPE import RotaryPositionalEmbedding
 from cs336_basics.Model.TransformerBlock import TransformerBlock
 from cs336_basics.Model.multihead_self_attention import multihead_self_attention
+from cs336_basics.Training.lr_cosine_schedule import lr_cosine_schedule
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 from cs336_basics.Model.Linear import Linear
 from cs336_basics.Model.Embedding import Embedding
@@ -578,7 +579,7 @@ def run_get_lr_cosine_schedule(
     Returns:
         Learning rate at the given iteration under the specified schedule.
     """
-    raise NotImplementedError
+    return lr_cosine_schedule(t = it, a_max = max_learning_rate, a_min = min_learning_rate, T_w = warmup_iters, T_c = cosine_cycle_iters)
 
 
 def run_save_checkpoint(
