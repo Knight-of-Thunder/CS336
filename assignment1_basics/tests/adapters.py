@@ -33,7 +33,7 @@ from cs336_basics.Model.scaled_dot_product_attention import scaled_dot_product_a
 
 from cs336_basics.Training.cross_entropy_loss import cross_entropy
 from cs336_basics.Training.AdamW import AdamW
-
+from cs336_basics.Training.gradient_clip import gradient_clip
 def run_linear(
     d_in: int,
     d_out: int,
@@ -544,7 +544,7 @@ def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm:
 
     The gradients of the parameters (parameter.grad) should be modified in-place.
     """
-    raise NotImplementedError
+    gradient_clip(parameters, max_l2_norm)
 
 
 def get_adamw_cls() -> Any:
