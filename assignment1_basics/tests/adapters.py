@@ -29,7 +29,9 @@ from collections import Counter
 from cs336_basics.scaled_dot_product_attention import scaled_dot_product_attention
 
 
+
 from cs336_basics.Training.cross_entropy_loss import cross_entropy
+from cs336_basics.Training.AdamW import AdamW
 
 def run_linear(
     d_in: int,
@@ -548,7 +550,7 @@ def get_adamw_cls() -> Any:
     """
     Returns a torch.optim.Optimizer that implements AdamW.
     """
-    raise NotImplementedError
+    return AdamW
 
 
 def run_get_lr_cosine_schedule(
