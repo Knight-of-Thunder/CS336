@@ -14,6 +14,7 @@ from torch import Tensor
 from cs336_basics.Model.RoPE import RotaryPositionalEmbedding
 from cs336_basics.Model.TransformerBlock import TransformerBlock
 from cs336_basics.Model.multihead_self_attention import multihead_self_attention
+from cs336_basics.Training.get_batch import get_batch
 from cs336_basics.Training.lr_cosine_schedule import lr_cosine_schedule
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 from cs336_basics.Model.Linear import Linear
@@ -496,7 +497,7 @@ def run_get_batch(
         is the sampled input sequences, and the second tuple item is the corresponding
         language modeling labels.
     """
-    raise NotImplementedError
+    return get_batch(dataset, batch_size, context_length, device)
 
 
 def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, " ..."]:
