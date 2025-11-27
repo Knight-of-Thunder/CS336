@@ -1,5 +1,4 @@
 import torch
-from einops import repeat
 from Model.Softmax import Softmax
 def decode(model, prompt, max_new_tokens = 50, temperature = 0.9, top_p = 0.9, eos_token_id = None):
     """
@@ -16,9 +15,9 @@ def decode(model, prompt, max_new_tokens = 50, temperature = 0.9, top_p = 0.9, e
             break
     return out_put
 
-def top_p_filter(probs, top_p = 0.9):
+def top_p_filter(probs, top_p = 0.9): 
     """
-    Filter the logits using top-p (nucleus) filtering.
+    Filter the logits using top-p filtering.
     """
     sorted_probs, sorted_indices = torch.sort(probs, descending=True)
     cumulative_probs = torch.cumsum(sorted_probs, dim=-1)

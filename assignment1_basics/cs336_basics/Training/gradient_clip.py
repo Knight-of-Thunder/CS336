@@ -12,3 +12,11 @@ def gradient_clip(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float) 
         for p in parameters:
             if p.grad is not None:
                 p.grad.data *= clip_coef
+
+def compute_grad_norm(parameters: Iterable[torch.nn.Parameter]):
+    total_norm_squared = 0
+    for p in parameters:
+        if p.grad is not None:
+            total_norm_squared += p.grad.data.pow(2).sum()
+    total_norm = math.sqrt(total_norm_squared)
+    return total_norm
