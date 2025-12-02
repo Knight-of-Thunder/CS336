@@ -10,7 +10,7 @@ model = {
 }
 
 optimizer = {
-    "lr": 3e-4,
+    "lr": 3e-3,
     "weight_decay": 1e-2,
     "betas": (0.9, 0.999),
     "max_norm": 1.0
@@ -27,8 +27,8 @@ train = {
 }
 
 paths = {
-    "training_dataset_path": "./data/train.npy",
-    "validation_dataset_path": "./data/valid.npy",
+    "training_dataset_path": "./data/output/TinyStories_train_10000_token_ids.npy",
+    "validation_dataset_path": "./data/output/TinyStories_valid_10000_token_ids.npy",
     "checkpoint_load_path": None,
     "checkpoint_save_format": "./data/model/checkpoint_{}.pt",
     "final_model_path": "./data/model/final_model.pt"
