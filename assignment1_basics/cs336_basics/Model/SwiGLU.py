@@ -9,11 +9,12 @@ class SwiGLU(nn.Module):
         self,
         d_model: int,
         d_ff: int,
+        device=None
     ):
         super().__init__()
-        self.linear1 = Linear(d_model, d_ff)
-        self.linear2 = Linear(d_ff, d_model)
-        self.linear3 = Linear(d_model, d_ff)
+        self.linear1 = Linear(d_model, d_ff, device)
+        self.linear2 = Linear(d_ff, d_model, device)
+        self.linear3 = Linear(d_model, d_ff, device)
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

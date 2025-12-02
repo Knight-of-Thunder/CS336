@@ -13,7 +13,7 @@ class multihead_self_attention(nn.Module):
         rope: bool = False,
         theta: float | None = None,
         max_seq_len: int | None = None,
-
+        device = None
     ) -> None:
         super().__init__()
         if d_model % num_heads != 0:
@@ -22,16 +22,16 @@ class multihead_self_attention(nn.Module):
         self.num_heads = num_heads
         self.d_v = self.d_k = d_model // num_heads
 
-        self.W_Q = Linear(d_model, d_model)
-        self.W_K = Linear(d_model, d_model)
-        self.W_V = Linear(d_model, d_model)
-        self.W_O = Linear(d_model, d_model)
+        self.W_Q = Linear(d_model, d_model, device=device)
+        self.W_K = Linear(d_model, d_model, device=device)
+        self.W_V = Linear(d_model, d_model, device=device)
+        self.W_O = Linear(d_model, d_model, device=device)
 
         if rope:
             from .RoPE import RotaryPositionalEmbedding as RoPE
             assert max_seq_len is not None
             assert theta is not None
-            self.rope = RoPE(theta=theta, d_k=self.d_k, max_seq_len=max_seq_len)
+            self.rope = RoPE(theta=theta, d_k=self.d_k, max_seq_len=max_seq_len, device=device)
         
     def forward(
         self,
@@ -39,7 +39,8 @@ class multihead_self_attention(nn.Module):
         token_positions: Int[torch.Tensor, " ... sequence_length"] | None = None,
     ):
         seq_len = x.shape[-2]
-        mask = torch.tril(torch.ones(seq_len, seq_len), diagonal=0).bool()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        mask = torch.tril(torch.ones(seq_len, seq_len, device=device), diagonal=0).bool()
         Q = self.W_Q(x)
         K = self.W_K(x)
         V = self.W_V(x)

@@ -13,9 +13,11 @@ class RotaryPositionalEmbedding(nn.Module):
         self.d_k = d_k
         self.max_seq_len = max_seq_len
 
-        freqs = 1 /  self.theta ** (torch.arange(0, self.d_k, 2)  / self.d_k)
+        # freqs = 1 /  self.theta ** (torch.arange(0, self.d_k, 2)  / self.d_k)
 
-        t = torch.arange(max_seq_len)
+        # t = torch.arange(max_seq_len)
+        freqs = 1.0 / (theta ** (torch.arange(0, d_k, 2, device=device) / d_k))
+        t = torch.arange(max_seq_len, device=device)
 
         angles = einsum(t, freqs, "i, j -> i j")
 
