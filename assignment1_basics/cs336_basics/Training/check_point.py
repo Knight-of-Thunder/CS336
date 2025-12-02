@@ -12,5 +12,6 @@ def save_checkpoint(model, optimizer, iteration, out):
 def load_checkpoint(src, model, optimizer):
     checkpoint = torch.load(src)
     model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    if optimizer is not None:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['iteration']
