@@ -1,2 +1,5 @@
 __pycache__/
 data/
+cs336_basics/test_wandb.py
+cs336_basics/wandb/
+wandb/

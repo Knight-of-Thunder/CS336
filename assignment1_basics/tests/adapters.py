@@ -14,6 +14,7 @@ from torch import Tensor
 from cs336_basics.Model.RoPE import RotaryPositionalEmbedding
 from cs336_basics.Model.TransformerBlock import TransformerBlock
 from cs336_basics.Model.multihead_self_attention import multihead_self_attention
+from cs336_basics.Tokenizer.train_bpe import train_bpe
 from cs336_basics.Training.check_point import load_checkpoint, save_checkpoint
 from cs336_basics.Training.get_batch import get_batch
 from cs336_basics.Training.lr_cosine_schedule import lr_cosine_schedule
@@ -674,6 +675,7 @@ def run_train_bpe(
                 representing that <token1> was merged with <token2>.
                 Merges are ordered by order of creation.
     """
+    # return train_bpe(input_path, vocab_size, special_tokens, **kwargs,)
     # Build final vocabulary
     vocab: dict[int, bytes] = {}
     token_id = 0
