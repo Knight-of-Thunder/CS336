@@ -1,6 +1,8 @@
 from einops import einsum
 from .Softmax import Softmax
+import torch.cuda.nvtx as nvtx
 
+@nvtx.range("scaled dot product attention")
 def scaled_dot_product_attention(query, key, value, mask=None):
     """
     Given key (K), query (Q), and value (V) tensors, return
@@ -14,11 +16,14 @@ def scaled_dot_product_attention(query, key, value, mask=None):
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    QK = einsum(query, key, "... q d_k, ... k d_k -> ... q k")
-    d_k = query.shape[-1]
-    scaled_QK = QK / d_k**0.5
-    if mask is not None:
-        scaled_QK = scaled_QK.masked_fill(~mask, float('-inf'))
-    attention_weights = Softmax(scaled_QK, dim=-1)
-    output = einsum(attention_weights, value, "... q k, ... k d_v -> ... q d_v")
+    with nvtx.range("computing attention scores"):
+        QK = einsum(query, key, "... q d_k, ... k d_k -> ... q k")
+        d_k = query.shape[-1]
+        scaled_QK = QK / d_k**0.5
+        if mask is not None:
+            scaled_QK = scaled_QK.masked_fill(~mask, float('-inf'))
+    with nvtx.range("computing softmax"):
+        attention_weights = Softmax(scaled_QK, dim=-1)
+    with nvtx.range("final matmul"):
+        output = einsum(attention_weights, value, "... q k, ... k d_v -> ... q d_v")
     return output
