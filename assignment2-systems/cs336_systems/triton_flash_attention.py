@@ -127,6 +127,14 @@ def flash_fwd_kernel(
     tl.store(O_block_ptr, O_i.to(O_block_ptr.type.element_ty))
     # tl.store(L_ptr_out, L_i)
 
+# Define tile sizes
+def pick_tiles(D):
+    if D <= 32:
+        return 64, 64
+    elif D <= 64:
+        return 32, 32
+    else:  # D >= 128
+        return 16, 16
 
 class TritonFlashAttention2Algorithm(torch.autograd.Function):
     @staticmethod
@@ -139,9 +147,7 @@ class TritonFlashAttention2Algorithm(torch.autograd.Function):
         O = torch.empty((B, Nq, D), device=Q.device, dtype=Q.dtype)
         L = torch.empty((B, Nq), device=Q.device, dtype=Q.dtype)
 
-        # Define tile sizes
-        Q_TILE_SIZE = 64
-        K_TILE_SIZE = 64
+        Q_TILE_SIZE, K_TILE_SIZE = pick_tiles(D)
 
         # Calculate grid dimensions
         grid_q = (Nq + Q_TILE_SIZE - 1) // Q_TILE_SIZE
