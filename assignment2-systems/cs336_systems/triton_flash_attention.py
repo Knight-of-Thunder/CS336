@@ -17,6 +17,7 @@ def flash_fwd_kernel(
     D: tl.constexpr,                  # 特征维度（编译期常量）
     Q_TILE_SIZE: tl.constexpr,        # 查询分块尺寸B_q
     K_TILE_SIZE: tl.constexpr,        # 键分块尺寸B_k 
+    is_causal: tl.constexpr,
 ):
     # 获取程序索引
     query_tile_index = tl.program_id(0)  # 查询区块索引
@@ -87,7 +88,11 @@ def flash_fwd_kernel(
         # Compute scaled dot-product scores S_ij
         # shapes: Qi (B_q, D), Kj (B_k, D) -> scores (B_q, B_k)
         S_ij = tl.dot(Qi, tl.trans(Kj)) * scale  # (B_q, B_k)
-
+        if is_causal:
+            q_idx = query_tile_index * Q_TILE_SIZE + tl.arange(0, Q_TILE_SIZE)
+            k_idx = k_tile_index * K_TILE_SIZE + tl.arange(0, K_TILE_SIZE)
+            causal_mask = q_idx[:, None] >= k_idx[None, :]
+            S_ij += tl.where(causal_mask, 0.0, -1e6)
         m_ij = tl.maximum(m_i, tl.max(S_ij, axis=1))  # (B_q,)
 
         # Compute exp(S_ij - m_ij)
@@ -126,6 +131,7 @@ class TritonFlashAttention2Algorithm(torch.autograd.Function):
     def forward(ctx, Q, K, V, is_causal=False):
         B, Nq, D = Q.shape
         _, Nk, _ = K.shape
+        ctx.is_causal = is_causal
 
         # Output tensors
         O = torch.empty((B, Nq, D), device=Q.device, dtype=Q.dtype)
@@ -166,6 +172,7 @@ class TritonFlashAttention2Algorithm(torch.autograd.Function):
             D=D,
             Q_TILE_SIZE=Q_TILE_SIZE,
             K_TILE_SIZE=K_TILE_SIZE,
+            is_causal=is_causal,
         )
 
         ctx.save_for_backward(Q, K, V, L)
