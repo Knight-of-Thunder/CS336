@@ -1,6 +1,30 @@
 import math
 import torch
 
+
+@torch.compile
+def _flash_backward_core(Q, K, V, O, L, dO, is_causal):
+    B, Nq, d = Q.shape
+    scale = 1.0 / math.sqrt(d)
+
+    D = torch.sum(O * dO, dim=-1)
+
+    S = torch.matmul(Q, K.transpose(-1, -2)) * scale
+
+    if is_causal:
+        mask = torch.tril(torch.ones_like(S), diagonal=0)
+        S = S.masked_fill(mask == 0, -1e6)
+
+    P = torch.exp(S - L.unsqueeze(-1))
+
+    dV = torch.matmul(P.transpose(-1, -2), dO)
+    dP = torch.matmul(dO, V.transpose(-1, -2))
+    dS = P * (dP - D.unsqueeze(-1))
+    dQ = torch.matmul(dS, K) * scale
+    dK = torch.matmul(dS.transpose(-1, -2), Q) * scale
+
+    return dQ, dK, dV
+
 class FlashAttention2Algorithm(torch.autograd.Function):
     """
     Strict Algorithm-1 style FlashAttention-2 forward (single-head).
@@ -108,7 +132,12 @@ class FlashAttention2Algorithm(torch.autograd.Function):
 
         return O
 
+
     @staticmethod
     def backward(ctx, *grad_outputs):
-        # left unimplemented for this part of the assignment
-        raise NotImplementedError("Backward not implemented in this step.")
+        Q, K, V, O, L = ctx.saved_tensors
+        dO = grad_outputs[0]
+        dQ, dK, dV = _flash_backward_core(
+            Q, K, V, O, L, dO, ctx.is_causal
+        )
+        return dQ, dK, dV, None
