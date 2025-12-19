@@ -2,6 +2,8 @@ import math
 import triton
 import triton.language as tl
 import torch
+
+from cs336_systems.pytorch_flash_attention import _flash_backward_core
 @triton.jit
 def flash_fwd_kernel(
     Q_ptr, K_ptr, V_ptr,  # 输入矩阵指针
@@ -175,8 +177,17 @@ class TritonFlashAttention2Algorithm(torch.autograd.Function):
             is_causal=is_causal,
         )
 
-        ctx.save_for_backward(Q, K, V, L)
+        ctx.save_for_backward(Q, K, V, O, L)
         ctx.scale = 1.0 / math.sqrt(D)
         ctx.is_causal = is_causal
 
         return O
+    
+    @staticmethod
+    def backward(ctx, *grad_outputs):
+        Q, K, V, O, L = ctx.saved_tensors
+        dO = grad_outputs[0]
+        dQ, dK, dV = _flash_backward_core(
+            Q, K, V, O, L, dO, ctx.is_causal
+        )
+        return dQ, dK, dV, None
